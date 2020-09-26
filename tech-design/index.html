@@ -1,0 +1,512 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>技术设计 | 天眼数据采集系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="baidu-site-verification" content="1ZsVVOmjoT" />
+    <meta name="description" content="一、系统目标天眼系统致力于帮助业务系统收集埋点数据。 二、天眼系统名词解释 APP生命周期ID（appLCID）：APP从下载到卸载的唯一标识，由客户端产生。 会话ID（sessionId）：用户进行一系列连贯操作的标识，一般是从用户打开APP时产生，当用户30分钟以上无任何操作，或APP进程被杀死，会话ID失效。 appid：业务系统id，由埋点服务端分配。 secret：业务系统密钥，由埋点服">
+<meta property="og:type" content="website">
+<meta property="og:title" content="技术设计">
+<meta property="og:url" content="https://www.qingtui.com/tech-design/index.html">
+<meta property="og:site_name" content="天眼数据采集系统">
+<meta property="og:description" content="一、系统目标天眼系统致力于帮助业务系统收集埋点数据。 二、天眼系统名词解释 APP生命周期ID（appLCID）：APP从下载到卸载的唯一标识，由客户端产生。 会话ID（sessionId）：用户进行一系列连贯操作的标识，一般是从用户打开APP时产生，当用户30分钟以上无任何操作，或APP进程被杀死，会话ID失效。 appid：业务系统id，由埋点服务端分配。 secret：业务系统密钥，由埋点服">
+<meta property="og:locale">
+<meta property="og:image" content="https://snspublicmedia.qingtui.com/fe-track/%E8%BD%BB%E6%8E%A8%E6%9E%B6%E6%9E%84%E5%9B%BE.013.jpeg">
+<meta property="og:image" content="https://snspublicmedia.qingtui.com/fe-track/%E5%9F%8B%E7%82%B9%E6%80%BB%E6%B5%81%E7%A8%8B.png">
+<meta property="og:image" content="https://snspublicmedia.qingtui.com/fe-track/%E5%9F%8B%E7%82%B9%E6%97%B6%E5%BA%8F%E5%9B%BE.png">
+<meta property="og:image" content="https://snspublicmedia.qingtui.com/fe-track/%E6%89%93%E7%82%B9SDK%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BE%E8%AE%A1.png">
+<meta property="og:image" content="https://snspublicmedia.qingtui.com/fe-track/%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BE%E8%AE%A1%E5%9B%BE2.png">
+<meta property="og:image" content="https://snspublicmedia.qingtui.com/fe-track/%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%8E%A5%E5%8F%A3%E8%AE%BE%E8%AE%A1.png">
+<meta property="og:image" content="https://snspublicmedia.qingtui.com/fe-track/%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%8A%E4%BC%A0%E6%B5%81%E7%A8%8B.png">
+<meta property="og:image" content="https://snspublicmedia.qingtui.com/fe-track/%E5%9F%8B%E7%82%B9%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%A8%A1%E5%9D%97.png">
+<meta property="og:image" content="https://snspublicmedia.qingtui.com/fe-track/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B5%81%E7%A8%8B.png">
+<meta property="article:published_time" content="2020-09-25T14:19:57.000Z">
+<meta property="article:modified_time" content="2020-09-26T04:09:40.020Z">
+<meta property="article:author" content="Qingtui">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://snspublicmedia.qingtui.com/fe-track/%E8%BD%BB%E6%8E%A8%E6%9E%B6%E6%9E%84%E5%9B%BE.013.jpeg">
+    
+      <link rel="alternative" href="/atom.xml" title="天眼数据采集系统" type="application/atom+xml">
+    
+    
+      <link rel="icon" href="/css/favicon.ico">
+    
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<!-- Baidu Analytics -->
+<script type="text/javascript">
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?fe2c7555911b8560db5e56121c5d5960";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<!-- End Baidu Analytics -->
+
+
+    <script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script>
+<meta name="generator" content="Hexo 5.2.0"></head>
+<body>
+<div id="container"> 
+
+    
+    <div id="wrap">
+	   
+
+<header id="header" class="hdpage">
+    
+    <div id="header-outer" class="outer">
+        
+        <div id="header-inner" class="inner">
+          <nav id="main-nav">
+            <a id="main-nav-toggle" class="nav-icon"></a>
+            
+              <a class="main-nav-link" href="/">
+                  
+                  
+
+                
+                  产品介绍
+                </a>
+            
+              <a class="main-nav-link" href="/tech-design">
+                  
+                  
+
+                
+                  技术设计
+                </a>
+            
+              <a class="main-nav-link" href="/tags">
+                  
+                  
+
+                
+                  开发者文档
+                </a>
+            
+          </nav>
+          <nav id="sub-nav">
+            
+              <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+            
+            <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+          </nav>
+          <div id="search-form-wrap">
+            <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://www.qingtui.com"></form>
+          </div>
+        </div>
+    </div>
+</header>
+		<div class="outer">
+		
+    <article id="page-" class="article article-type-page" itemscope itemprop="blogPost">
+      <div class="article-meta">
+        
+          <header class="article-header">
+            
+  
+    <a href="/tech-design/index.html">
+      <h1 class="article-title" itemprop="name">
+        技术设计
+      </h1>
+    </a>
+  
+
+
+
+          </header>
+        
+
+        <!--<a href="/tech-design/index.html" class="article-date">
+  <time datetime="2020-09-25T14:19:57.000Z" itemprop="datePublished">2020-09-25</time>
+</a>-->
+        <!--  -->
+      </div>
+      <div class="article-inner">
+            
+            
+              <!--<header class="article-header">
+                
+  
+    <a href="/tech-design/index.html">
+      <h1 class="article-title" itemprop="name">
+        技术设计
+      </h1>
+    </a>
+  
+
+
+
+              </header>-->
+            
+            <div class="article-entry" itemprop="articleBody">
+              <div class="page-toc">
+                <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E7%B3%BB%E7%BB%9F%E7%9B%AE%E6%A0%87"><span class="toc-number">1.</span> <span class="toc-text">一、系统目标</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%A4%A9%E7%9C%BC%E7%B3%BB%E7%BB%9F%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A"><span class="toc-number">2.</span> <span class="toc-text">二、天眼系统名词解释</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-number">3.</span> <span class="toc-text">三、整体架构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%95%B4%E4%BD%93%E6%B5%81%E7%A8%8B"><span class="toc-number">4.</span> <span class="toc-text">四、整体流程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BE%E8%AE%A1"><span class="toc-number">5.</span> <span class="toc-text">五、客户端设计</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%A8%A1%E5%9D%97%E8%AE%BE%E8%AE%A1"><span class="toc-number">5.1.</span> <span class="toc-text">客户端模块设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF-SDK-%E6%8E%A5%E5%8F%A3%E8%AE%BE%E8%AE%A1"><span class="toc-number">5.2.</span> <span class="toc-text">客户端 SDK 接口设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%8A%E4%BC%A0%E6%B5%81%E7%A8%8B"><span class="toc-number">5.3.</span> <span class="toc-text">客户端上传流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%8A%A0%E5%AF%86%E8%AE%BE%E8%AE%A1"><span class="toc-number">5.4.</span> <span class="toc-text">客户端加密设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%BC%93%E5%AD%98%E8%AE%BE%E8%AE%A1"><span class="toc-number">5.5.</span> <span class="toc-text">客户端缓存设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%8A%E4%BC%A0%E6%9C%BA%E5%88%B6%E8%AE%BE%E8%AE%A1"><span class="toc-number">5.6.</span> <span class="toc-text">客户端上传机制设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BC%9A%E8%AF%9DID%E8%AE%BE%E8%AE%A1"><span class="toc-number">5.7.</span> <span class="toc-text">客户端会话ID设计</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%9C%8D%E5%8A%A1%E7%AB%AF%E8%AE%BE%E8%AE%A1"><span class="toc-number">6.</span> <span class="toc-text">六、服务端设计</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">6.1.</span> <span class="toc-text">服务端架构设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B5%81%E7%A8%8B%E8%AE%BE%E8%AE%A1"><span class="toc-number">6.2.</span> <span class="toc-text">服务端流程设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1"><span class="toc-number">6.3.</span> <span class="toc-text">数据库设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ES%E7%B4%A2%E5%BC%95%E8%AE%BE%E8%AE%A1"><span class="toc-number">6.4.</span> <span class="toc-text">ES索引设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84"><span class="toc-number">6.5.</span> <span class="toc-text">文件系统目录结构</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%8D%8F%E8%AE%AE%E4%B8%8E%E7%BA%A6%E5%AE%9A"><span class="toc-number">7.</span> <span class="toc-text">七、协议与约定</span></a></li></ol>
+              </div>
+              
+                <h1 id="一、系统目标"><a href="#一、系统目标" class="headerlink" title="一、系统目标"></a>一、系统目标</h1><p>天眼系统致力于帮助业务系统收集埋点数据。</p>
+<h1 id="二、天眼系统名词解释"><a href="#二、天眼系统名词解释" class="headerlink" title="二、天眼系统名词解释"></a>二、天眼系统名词解释</h1><ul>
+<li>APP生命周期ID（appLCID）：APP从下载到卸载的唯一标识，由客户端产生。</li>
+<li>会话ID（sessionId）：用户进行一系列连贯操作的标识，一般是从用户打开APP时产生，当用户30分钟以上无任何操作，或APP进程被杀死，会话ID失效。</li>
+<li>appid：业务系统id，由埋点服务端分配。</li>
+<li>secret：业务系统密钥，由埋点服务端分配。</li>
+<li>accessToken：应用凭证，标识业务系统的身份合法性，用于请求文件上传签名<h1 id="三、整体架构"><a href="#三、整体架构" class="headerlink" title="三、整体架构"></a>三、整体架构</h1></li>
+</ul>
+<p><img src="https://snspublicmedia.qingtui.com/fe-track/%E8%BD%BB%E6%8E%A8%E6%9E%B6%E6%9E%84%E5%9B%BE.013.jpeg"></p>
+<p>天眼系统由五大组件组成：</p>
+<ul>
+<li>客户端SDK：<ul>
+<li>内置于业务系统客户端，负责将客户端埋点日志上传到文件系统。</li>
+</ul>
+</li>
+<li>埋点日志服务端：<ul>
+<li>与客户端SDK交互，负责身份认证和文件上传授权；</li>
+<li>与文件系统交互，负责下载日志文件；</li>
+<li>负责文件解密与日志内容解析；</li>
+<li>与消息队列组件交互，负责将日志数据发送至消息队列。</li>
+</ul>
+</li>
+<li>文件系统：<ul>
+<li>负责保存客户端上传的埋点文件。</li>
+</ul>
+</li>
+<li>消息队列：<ul>
+<li>负责将埋点数据从埋点服务端传输到数据存储服务</li>
+</ul>
+</li>
+<li>埋点数据源：<ul>
+<li>负责保存埋点数据，支持搜索。</li>
+</ul>
+</li>
+<li>数据可视化：<ul>
+<li>负责数据分析可视化。<h1 id="四、整体流程"><a href="#四、整体流程" class="headerlink" title="四、整体流程"></a>四、整体流程</h1></li>
+</ul>
+</li>
+</ul>
+<p><img src="https://snspublicmedia.qingtui.com/fe-track/%E5%9F%8B%E7%82%B9%E6%80%BB%E6%B5%81%E7%A8%8B.png"></p>
+<ol>
+<li>用户操作触发埋点事件</li>
+<li>客户端记录埋点日志</li>
+<li>客户端上传日志到文件系统</li>
+<li>埋点服务端从文件系统下载日志</li>
+<li>埋点服务端解密文件，解析内容</li>
+<li>埋点服务端持久化埋点数据至搜索引擎</li>
+</ol>
+<p>以下是埋点整体过程时序图：</p>
+<p><img src="https://snspublicmedia.qingtui.com/fe-track/%E5%9F%8B%E7%82%B9%E6%97%B6%E5%BA%8F%E5%9B%BE.png"></p>
+<h1 id="五、客户端设计"><a href="#五、客户端设计" class="headerlink" title="五、客户端设计"></a>五、客户端设计</h1><h2 id="客户端模块设计"><a href="#客户端模块设计" class="headerlink" title="客户端模块设计"></a>客户端模块设计</h2><p><img src="https://snspublicmedia.qingtui.com/fe-track/%E6%89%93%E7%82%B9SDK%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BE%E8%AE%A1.png"></p>
+<p><img src="https://snspublicmedia.qingtui.com/fe-track/%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BE%E8%AE%A1%E5%9B%BE2.png" alt="图片"></p>
+<h2 id="客户端-SDK-接口设计"><a href="#客户端-SDK-接口设计" class="headerlink" title="客户端 SDK 接口设计"></a>客户端 SDK 接口设计</h2><p><img src="https://snspublicmedia.qingtui.com/fe-track/%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%8E%A5%E5%8F%A3%E8%AE%BE%E8%AE%A1.png"></p>
+<h2 id="客户端上传流程"><a href="#客户端上传流程" class="headerlink" title="客户端上传流程"></a>客户端上传流程</h2><p><img src="https://snspublicmedia.qingtui.com/fe-track/%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%8A%E4%BC%A0%E6%B5%81%E7%A8%8B.png" alt="图片"></p>
+<ol>
+<li>客户端下载后第一次打开，请求服务端生成appLCID，并持久化到客户端直到被卸载</li>
+<li>生成本次会话ID</li>
+<li>当埋点事件触发后，记录事件到APP缓存</li>
+<li>当达到落盘条件时，将缓存中的数据写入磁盘</li>
+<li>当满足上传条件时，将本地日志加密后，获取accessToken和文件签名，并上传至文件系统<h2 id="客户端加密设计"><a href="#客户端加密设计" class="headerlink" title="客户端加密设计"></a>客户端加密设计</h2></li>
+</ol>
+<p>现成的 AES+GZIP</p>
+<h2 id="客户端缓存设计"><a href="#客户端缓存设计" class="headerlink" title="客户端缓存设计"></a>客户端缓存设计</h2><p>自研 内存缓存+磁盘缓存 应用沙盒</p>
+<h2 id="客户端上传机制设计"><a href="#客户端上传机制设计" class="headerlink" title="客户端上传机制设计"></a>客户端上传机制设计</h2><p>不频繁 也不间隔太久 + 网络环境合适 + SDK手动触发</p>
+<h2 id="客户端会话ID设计"><a href="#客户端会话ID设计" class="headerlink" title="客户端会话ID设计"></a>客户端会话ID设计</h2><p>包括如何生成，如何失效，过期等</p>
+<h1 id="六、服务端设计"><a href="#六、服务端设计" class="headerlink" title="六、服务端设计"></a>六、服务端设计</h1><h2 id="服务端架构设计"><a href="#服务端架构设计" class="headerlink" title="服务端架构设计"></a>服务端架构设计</h2><p><img src="https://snspublicmedia.qingtui.com/fe-track/%E5%9F%8B%E7%82%B9%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%A8%A1%E5%9D%97.png"></p>
+<p>埋点系统服务端由四大组件构成：</p>
+<ul>
+<li>客户端交互模块<ul>
+<li>生成客户端生命周期ID</li>
+<li>认证客户端身份合法性，生成accessToken</li>
+<li>为客户端生成文件上传签名</li>
+</ul>
+</li>
+<li>OSS交互模块<ul>
+<li>监听文件上传事件</li>
+<li>下载日志文件</li>
+</ul>
+</li>
+<li>日志文件处理模块<ul>
+<li>解密日志文件</li>
+<li>解析文件内容</li>
+</ul>
+</li>
+<li>ES交互模块<ul>
+<li>写入数据到ES<h2 id="服务端流程设计"><a href="#服务端流程设计" class="headerlink" title="服务端流程设计"></a>服务端流程设计</h2></li>
+</ul>
+</li>
+</ul>
+<p><img src="https://snspublicmedia.qingtui.com/fe-track/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%B5%81%E7%A8%8B.png" alt="图片"></p>
+<h2 id="数据库设计"><a href="#数据库设计" class="headerlink" title="数据库设计"></a>数据库设计</h2><p>1.业务系统表(app)</p>
+<table>
+<thead>
+<tr>
+<th align="left">字段</th>
+<th align="left">类型</th>
+<th align="left">长度</th>
+<th align="left">非空</th>
+<th align="left">主键</th>
+<th align="left">注释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">id</td>
+<td align="left">bigint</td>
+<td align="left">11</td>
+<td align="left">√</td>
+<td align="left">√</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">appid</td>
+<td align="left">char</td>
+<td align="left">10</td>
+<td align="left">√</td>
+<td align="left"></td>
+<td align="left">业务系统id</td>
+</tr>
+<tr>
+<td align="left">secret</td>
+<td align="left">char</td>
+<td align="left">32</td>
+<td align="left">√</td>
+<td align="left"></td>
+<td align="left">业务系统密钥</td>
+</tr>
+<tr>
+<td align="left">name</td>
+<td align="left">varchar</td>
+<td align="left">100</td>
+<td align="left">√</td>
+<td align="left"></td>
+<td align="left">业务系统名称</td>
+</tr>
+</tbody></table>
+<p>2.日志读取记录表(file_log)</p>
+<table>
+<thead>
+<tr>
+<th align="left">字段</th>
+<th align="left">类型</th>
+<th align="left">长度</th>
+<th align="left">非空</th>
+<th align="left">主键</th>
+<th align="left">注释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">id</td>
+<td align="left">bigint</td>
+<td align="left">11</td>
+<td align="left">√</td>
+<td align="left">√</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">appid</td>
+<td align="left">char</td>
+<td align="left">10</td>
+<td align="left">√</td>
+<td align="left"></td>
+<td align="left">业务系统id</td>
+</tr>
+<tr>
+<td align="left">file_name</td>
+<td align="left">varchar</td>
+<td align="left">255</td>
+<td align="left">√</td>
+<td align="left"></td>
+<td align="left">文件名称</td>
+</tr>
+<tr>
+<td align="left">file_url</td>
+<td align="left">varchar</td>
+<td align="left">255</td>
+<td align="left">√</td>
+<td align="left"></td>
+<td align="left">文件路径</td>
+</tr>
+<tr>
+<td align="left">status</td>
+<td align="left">tinyint</td>
+<td align="left">2</td>
+<td align="left">√</td>
+<td align="left"></td>
+<td align="left">文件状态 0-处理完成 1-处理有误</td>
+</tr>
+<tr>
+<td align="left">gmt_create</td>
+<td align="left">datetime</td>
+<td align="left">3</td>
+<td align="left">√</td>
+<td align="left"></td>
+<td align="left">记录创建时间</td>
+</tr>
+</tbody></table>
+<p>3.APP生命周期表(app_life_circle)</p>
+<table>
+<thead>
+<tr>
+<th align="left">字段</th>
+<th align="left">类型</th>
+<th align="left">长度</th>
+<th align="left">非空</th>
+<th align="left">主键</th>
+<th align="left">注释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">id</td>
+<td align="left">bigint</td>
+<td align="left">11</td>
+<td align="left">√</td>
+<td align="left">√</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">appid</td>
+<td align="left">char</td>
+<td align="left">10</td>
+<td align="left">√</td>
+<td align="left"></td>
+<td align="left">业务系统id</td>
+</tr>
+<tr>
+<td align="left">app_life_circle_id</td>
+<td align="left">char</td>
+<td align="left">32</td>
+<td align="left">√</td>
+<td align="left"></td>
+<td align="left">APP生命周期ID</td>
+</tr>
+<tr>
+<td align="left">gmt_create</td>
+<td align="left">datetime</td>
+<td align="left">3</td>
+<td align="left">√</td>
+<td align="left"></td>
+<td align="left">记录创建时间</td>
+</tr>
+</tbody></table>
+<h2 id="ES索引设计"><a href="#ES索引设计" class="headerlink" title="ES索引设计"></a>ES索引设计</h2><p>索引名称：[appid]_[event]_YYYY.MM.DD</p>
+<p>当前版本使用appid_event加日期来建立索引，好处是数据查询方便，未来数据量过大后可采用冷热数据分离来优化。</p>
+<h2 id="文件系统目录结构"><a href="#文件系统目录结构" class="headerlink" title="文件系统目录结构"></a>文件系统目录结构</h2><p>/track/${appid}/${platform}/${date}/${fileName}</p>
+<h1 id="七、协议与约定"><a href="#七、协议与约定" class="headerlink" title="七、协议与约定"></a>七、协议与约定</h1><p><del>日志文件命名协议：[track]<em>[appid]</em>[platform]<em>[yyyymmdd]</em>[</del>snowflake<del>].log</del></p>
+<p>日志文件命名协议：[uuid].log</p>
+<p>埋点内容通用数据结构：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;event&quot;</span>:<span class="string">&quot;event_name&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;prop&quot;</span>:&#123;</span><br><span class="line">        <span class="attr">&quot;appLCID&quot;</span>:<span class="string">&quot;APP生命周期ID&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;sessionId&quot;</span>:<span class="string">&quot;会话ID&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;time&quot;</span>:<span class="number">1000000000</span>,</span><br><span class="line">        <span class="attr">&quot;appVersion&quot;</span>:<span class="string">&quot;1.0.0&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;branch&quot;</span>:<span class="string">&quot;A&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;platform&quot;</span>:<span class="string">&quot;android&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;device&quot;</span>:&#123;</span><br><span class="line">            <span class="attr">&quot;deviceId&quot;</span>:<span class="string">&quot;设备id&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;os&quot;</span>:<span class="string">&quot;操作系统及版本&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;model&quot;</span>:<span class="string">&quot;设备型号&quot;</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">&quot;ext&quot;</span>:&#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+              
+            </div>
+            <footer class="article-footer">
+              <a href="/tech-design/index.html" class="article-date">
+  <time datetime="2020-09-25T14:19:57.000Z" itemprop="datePublished">2020-09-25</time>
+</a>
+              <a data-url="https://www.qingtui.com/tech-design/index.html" data-id="ckfic1yyh0000jl3vdhhf40b3" class="article-share-link">Share</a>
+              
+              
+            </footer>
+      </div>
+      
+        
+      
+    </article>
+    <script type="text/javascript">
+      window.onscroll = function(){ 
+        $(function(){
+          var $toc = $('.page-toc'),
+              $article = $('.article-entry')
+              toc_top = $toc.offset().top
+              tocsub_width = $toc.children().width()
+              article_height = $article.children().height()
+              scroll_top = document.body.scrollTop
+              screen_h = $(window).height()
+              footer_top = $('.article-footer').offset().top - $(window).height()
+              if(toc_top&&scroll_top&&scroll_top>toc_top&&scroll_top<footer_top){
+                $toc.children().css({
+                  "position": "fixed",
+                  "height": (screen_h -20)+'px',
+                  "overflow": "auto"
+                })
+                $article.css('margin-right',tocsub_width+'px')
+              }else{
+                $toc.children().css({
+                  "position": "relative",
+                  "height":'inherit',
+                  "overflow": "auto"
+                })
+                $article.css('margin-right',0+'px')
+              }
+        })
+      } 
+    </script>
+
+
+
+
+
+
+
+
+		</div>
+		
+
+<footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+        <div class="left">
+            &copy; 2020 Qingtui<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> and Theme by <a target="_blank" rel="noopener" href="https://github.com/jaywcjlove/hexoThemeKacper">hexoThemeKacper </a>
+        </div>
+        <div class="right">
+            
+        </div>
+    </div>
+  </div>
+</footer>
+<script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+<script type="text/javascript">
+$(function(){
+  var $img = $('.article-entry img'),
+      $link = $img.css({
+        "display":"inline-block"
+      }).parent()
+
+  if($link.parent().is("a")){
+      $img.each(function(idx,item) {
+      $(this).parent().attr('href',$(this).parent().parent().attr('href'))
+    })
+  }
+})
+</script>
+
+
+
+<script src="/js/script.js"></script>
+
+
+  	</div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">产品介绍</a>
+  
+    <a href="/tech-design" class="mobile-nav-link">技术设计</a>
+  
+    <a href="/tags" class="mobile-nav-link">开发者文档</a>
+  
+</nav>
+    
+</div>
+</body>
+</html>
+
